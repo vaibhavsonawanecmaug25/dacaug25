@@ -13,7 +13,7 @@ function Navbar() {
 
   return (
     <nav
-      className="navbar navbar-expand-lg navbar-dark shadow-sm"
+      className="navbar navbar-expand-xl navbar-dark shadow-sm"
       style={{ backgroundColor: "rgb(11,23,81)" }}
     >
       <div className="container">
@@ -33,17 +33,23 @@ function Navbar() {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link className="nav-link" to="/">
+              <Link className="nav-link text-white" to="/">
                 Home
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/about">
+              <Link className="nav-link text-white" to="/about">
                 About Us
               </Link>
             </li>
 
-            {/* ✅ Show these only when user is logged in */}
+            <li className="nav-item">
+              <Link className="nav-link text-white" to="/contact">
+               Contact us
+              </Link>
+             </li>
+
+           
             {user && (
               <>
                 <li className="nav-item">
@@ -65,7 +71,7 @@ function Navbar() {
             )}
           </ul>
 
-          {/* ✅ Moved this div outside <ul> for proper layout */}
+        
           <div className="d-flex ms-3">
             {user ? (
               <button className="btn btn-outline-light" onClick={handleLogout}>
@@ -79,9 +85,11 @@ function Navbar() {
                 <Link className="btn btn-light" to="/signup">
                   Signup
                 </Link>
+                
               </>
             )}
           </div>
+               
         </div>
       </div>
     </nav>

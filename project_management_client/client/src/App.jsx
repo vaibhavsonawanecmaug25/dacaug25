@@ -9,7 +9,8 @@ import CreateProject from "./components/createproject.jsx";
 import Tasks from "./components/task.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import Login from "./components/login.jsx";
-import ProtectedRoute from "./components/protectedroutes.jsx"; // ✅ exact match
+import ProtectedRoute from "./components/protectedroutes.jsx"; 
+import Contact from "./components/contact.jsx";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/contact" element={<Contact />} />
 
           {/* Protected Routes */}
           <Route
