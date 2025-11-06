@@ -6,18 +6,36 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+useEffect(() => {
+  const verifyToken = async () => {
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
 
     if (token && userData) {
-      setUser(JSON.parse(userData));
-    } else {
-      setUser(null);
-    }
+      try {
+        const res = await fetch("http://localhost:4400/auth/verify", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
+        if (!res.ok) throw new Error("Invalid token");
+
+        const data = await res.json();
+        if (data.valid) {
+          setUser(JSON.parse(userData));
+        } else {
+          logout();
+        }
+      } catch (err) {
+        console.warn("Token invalid or expired:", err);
+        logout();
+      }
+    }
     setLoading(false);
-  }, []);
+  };
+
+  verifyToken();
+}, []);
+
 
   const login = (token, userData) => {
     localStorage.setItem("token", token);

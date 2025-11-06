@@ -1,13 +1,26 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "./authcontext.jsx";
 
 function Navbar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
-
-
-    <nav className="navbar navbar-expand-lg navbar-dark  shadow-sm" style={{ backgroundColor: "rgb(11,23,81)" }}>
+    <nav
+      className="navbar navbar-expand-lg navbar-dark shadow-sm"
+      style={{ backgroundColor: "rgb(11,23,81)" }}
+    >
       <div className="container">
-        <Link className="navbar-brand fw-bold text-primary " to="/">Project Management Tool</Link>
+        <Link className="navbar-brand fw-bold text-primary" to="/">
+          Project Management Tool
+        </Link>
+
         <button
           className="navbar-toggler"
           type="button"
@@ -20,27 +33,55 @@ function Navbar() {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link className="nav-link" to="/">Home</Link>
+              <Link className="nav-link" to="/">
+                Home
+              </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/about">About us</Link>
+              <Link className="nav-link" to="/about">
+                About Us
+              </Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/create-project">Add Project</Link>
-            </li>
-            <li>
-              <Link className="nav-link" to="/tasks">Tasks</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/signup">Sign Up</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/login">Login</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/dashboard">Dashboard</Link>
-            </li>
+
+            {/* ✅ Show these only when user is logged in */}
+            {user && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/create-project">
+                    Add Project
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/tasks">
+                    Tasks
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/dashboard">
+                    Dashboard
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
+
+          {/* ✅ Moved this div outside <ul> for proper layout */}
+          <div className="d-flex ms-3">
+            {user ? (
+              <button className="btn btn-outline-light" onClick={handleLogout}>
+                Logout
+              </button>
+            ) : (
+              <>
+                <Link className="btn btn-outline-light me-2" to="/login">
+                  Login
+                </Link>
+                <Link className="btn btn-light" to="/signup">
+                  Signup
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </nav>
