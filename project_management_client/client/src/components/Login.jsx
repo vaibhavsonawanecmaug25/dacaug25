@@ -4,9 +4,12 @@ import { login as apiLogin } from "../auth";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useAuth } from "./authcontext.jsx";  
+
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ from AuthContext
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -17,18 +20,26 @@ export default function Login() {
     setIsSubmitting(true);
     try {
       const { token, user } = await apiLogin(form.email, form.password);
+
+      // ✅ Save token & user in AuthContext
+      login(token, user);
+
       toast.success("Login successful!");
-      
-      // Redirect based on role
-      const target = (user?.role === "Admin") ? "/admin" : "/dashboard";
+
+      // Redirect based on role (make sure role is lowercase in DB)
+      const target = user?.role === "admin" ? "/admin" : "/dashboard";
       setTimeout(() => navigate(target), 500);
     } catch (err) {
-      const msg = err.response?.data?.error || err.message || "Login failed. Please check your credentials.";
+      const msg =
+        err.response?.data?.error ||
+        err.message ||
+        "Login failed. Please check your credentials.";
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">

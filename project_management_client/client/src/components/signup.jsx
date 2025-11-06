@@ -145,7 +145,7 @@ const Signup = () => {
             {/* Submit */}
             <button
               type="submit"
-              className="btn btn-primary w-100"
+              className="btn btn-primary w-100 fw-semibold py-2 shadow-sm"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Submitting..." : "Sign Up"}

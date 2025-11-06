@@ -1,7 +1,8 @@
 import axios from 'axios';
 import API_URL from './api';
 
-const TOKEN_KEY = 'jwt_token';
+// Use the same key your AuthContext uses ("token")
+const TOKEN_KEY = 'token';
 
 export function setToken(token) {
   if (token) localStorage.setItem(TOKEN_KEY, token);
@@ -44,5 +45,3 @@ axios.interceptors.request.use((config) => {
   }
   return config;
 });
-
-

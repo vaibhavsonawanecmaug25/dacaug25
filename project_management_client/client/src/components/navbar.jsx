@@ -7,7 +7,7 @@ function Navbar() {
 
     <nav className="navbar navbar-expand-lg navbar-dark  shadow-sm" style={{ backgroundColor: "rgb(11,23,81)" }}>
       <div className="container">
-        <Link className="navbar-brand fw-bold text-primary " to="/">ProjectTool</Link>
+        <Link className="navbar-brand fw-bold text-primary " to="/">Project Management Tool</Link>
         <button
           className="navbar-toggler"
           type="button"

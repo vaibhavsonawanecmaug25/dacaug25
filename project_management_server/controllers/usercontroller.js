@@ -67,6 +67,8 @@ export async function getallusers(request, response) {
     response.status(200).send(rows);
   } catch (error) {
     console.log("Error in getAllUsers:", error);
+    console.error("Backend /users error:", err);
+
     response.status(500).send({ message: "Something went wrong while fetching users" });
   }
 }
