@@ -1,15 +1,21 @@
 import { getConnectionObject } from "../src/config.js";
 
 // ✅ Create Project
-export async function createproject(request, response) {
+export async function createproject(req, res) {
   try {
     const conn = await getConnectionObject();
-    const { project_name, description, start_date, end_date, manager_id, status } = request.body;
+    const { project_name, description, start_date, end_date, manager_id, status } = req.body;
 
-    const qry = `INSERT INTO projects (project_name, description, start_date, end_date, manager_id, status)
-                 VALUES (?, ?, ?, ?, ?, ?)`;
+    if (!project_name) {
+      return res.status(400).json({ error: "Project name is required" });
+    }
 
-    const [resultSet] = await conn.query(qry, [
+    const query = `
+      INSERT INTO projects (project_name, description, start_date, end_date, manager_id, status)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    const [result] = await conn.query(query, [
       project_name,
       description || "",
       start_date || null,
@@ -18,9 +24,9 @@ export async function createproject(request, response) {
       status || "Planned"
     ]);
 
-    response.status(201).send({
+    res.status(201).json({
       message: "Project created successfully",
-      id: resultSet.insertId,
+      project_id: result.insertId,
       project_name,
       description,
       start_date,
@@ -28,118 +34,131 @@ export async function createproject(request, response) {
       manager_id,
       status
     });
-  } catch (error) {
-    console.error("Error creating project:", error);
-    response.status(500).send("Something went wrong while creating project");
+  } catch (err) {
+    console.error("❌ Error creating project:", err);
+    res.status(500).json({ error: "Something went wrong while creating project", details: err.message });
   }
 }
 
-// ✅ Get all projects
-export async function getallprojects(request, response) {
+// ✅ Get All Projects
+export async function getallprojects(req, res) {
   try {
     const conn = await getConnectionObject();
-    if (!conn) {
-      console.error("Database connection not available");
-      return response.status(503).json({ error: "Database connection not available" });
-    }
-    const qry = `SELECT * FROM projects ORDER BY created_at DESC`;
-    const [resultSet] = await conn.query(qry);
-    console.log("Projects fetched:", resultSet.length);
-    response.status(200).json(resultSet);
-  } catch (error) {
-    console.error("Error fetching projects:", error);
-    response.status(500).json({ error: "Error fetching projects", details: error.message });
+    const [projects] = await conn.query(`SELECT * FROM projects ORDER BY created_at DESC`);
+    res.status(200).json(projects);
+  } catch (err) {
+    console.error("❌ Error fetching projects:", err);
+    res.status(500).json({ error: "Error fetching projects", details: err.message });
   }
 }
 
-// ✅ Get project by ID
-export async function getprojectbyid(request, response) {
+// ✅ Get Project by ID
+export async function getprojectbyid(req, res) {
   try {
     const conn = await getConnectionObject();
-    const { project_id } = request.params;
-    const qry = `SELECT * FROM projects WHERE project_id = ${project_id}`;
-    const [resultSet] = await conn.query(qry);
-    response.status(200).send(resultSet);
-  } catch (error) {
-    console.error("Error fetching project:", error);
-    response.status(500).send("Something went wrong");
+    const { project_id } = req.params;
+    const [rows] = await conn.query("SELECT * FROM projects WHERE project_id = ?", [project_id]);
+
+    if (rows.length === 0) return res.status(404).json({ error: "Project not found" });
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.error("❌ Error fetching project:", err);
+    res.status(500).json({ error: "Something went wrong", details: err.message });
   }
 }
 
-// ✅ Update project
-export async function updateproject(request, response) {
+// ✅ Update Project
+export async function updateproject(req, res) {
   try {
     const conn = await getConnectionObject();
-    const { project_id } = request.params;
-    const { name, description, start_date, end_date, manager_id, status } = request.body;
+    const { project_id } = req.params;
+    const { project_name, description, start_date, end_date, manager_id, status } = req.body;
 
-    const qry = `UPDATE projects 
-                 SET project_name='${name}', description='${description}', start_date='${start_date}', 
-                 end_date='${end_date}', manager_id=${manager_id || null}, status='${status}'
-                 WHERE project_id=${project_id}`;
+    const [result] = await conn.query(
+      `UPDATE projects 
+       SET project_name=?, description=?, start_date=?, end_date=?, manager_id=?, status=? 
+       WHERE project_id=?`,
+      [project_name, description, start_date, end_date, manager_id || null, status, project_id]
+    );
 
-    await conn.query(qry);
-    response.status(200).send({ message: "Project updated successfully" });
-  } catch (error) {
-    console.error("Error updating project:", error);
-    response.status(500).send("Something went wrong");
+    if (result.affectedRows === 0)
+      return res.status(404).json({ error: "Project not found" });
+
+    res.status(200).json({ message: "Project updated successfully" });
+  } catch (err) {
+    console.error("❌ Error updating project:", err);
+    res.status(500).json({ error: "Something went wrong", details: err.message });
   }
 }
 
-// ✅ Delete project
-export async function deleteproject(request, response) {
+// ✅ Delete Project
+export async function deleteproject(req, res) {
   try {
     const conn = await getConnectionObject();
-    const { project_id } = request.params;
-    const qry = `DELETE FROM projects WHERE project_id = ${project_id}`;
-    await conn.query(qry);
-    response.status(200).send({ message: "Project deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting project:", error);
-    response.status(500).send("Something went wrong");
+    const { project_id } = req.params;
+    const [result] = await conn.query("DELETE FROM projects WHERE project_id = ?", [project_id]);
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ error: "Project not found" });
+
+    res.status(200).json({ message: "Project deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting project:", err);
+    res.status(500).json({ error: "Something went wrong", details: err.message });
   }
 }
 
-// ✅ Assign manager to project
-export async function assignmanagertoproject(request, response) {
+// ✅ Assign Manager to Project
+export async function assignmanagertoproject(req, res) {
   try {
     const conn = await getConnectionObject();
-    const { project_id } = request.params;
-    const { manager_id } = request.body;
+    const { project_id } = req.params;
+    const { manager_id } = req.body;
 
-    const qry = `UPDATE projects SET manager_id = ${manager_id} WHERE project_id = ${project_id}`;
-    await conn.query(qry);
-    response.status(200).send({ message: "Manager assigned to project successfully" });
-  } catch (error) {
-    console.error("Error assigning manager:", error);
-    response.status(500).send("Something went wrong");
+    if (!manager_id)
+      return res.status(400).json({ error: "Manager ID is required" });
+
+    const [result] = await conn.query(
+      "UPDATE projects SET manager_id=? WHERE project_id=?",
+      [manager_id, project_id]
+    );
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ error: "Project not found" });
+
+    res.status(200).json({ message: "Manager assigned successfully" });
+  } catch (err) {
+    console.error("❌ Error assigning manager:", err);
+    res.status(500).json({ error: "Something went wrong", details: err.message });
   }
 }
 
-// ✅ Remove manager from project
-export async function removemanagerfromproject(request, response) {
+// ✅ Remove Manager from Project
+export async function removemanagerfromproject(req, res) {
   try {
     const conn = await getConnectionObject();
-    const { project_id } = request.params;
-    const qry = `UPDATE projects SET manager_id = NULL WHERE project_id = ${project_id}`;
-    await conn.query(qry);
-    response.status(200).send({ message: "Manager removed from project successfully" });
-  } catch (error) {
-    console.error("Error removing manager:", error);
-    response.status(500).send("Something went wrong");
+    const { project_id } = req.params;
+    const [result] = await conn.query("UPDATE projects SET manager_id=NULL WHERE project_id=?", [project_id]);
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ error: "Project not found" });
+
+    res.status(200).json({ message: "Manager removed successfully" });
+  } catch (err) {
+    console.error("❌ Error removing manager:", err);
+    res.status(500).json({ error: "Something went wrong", details: err.message });
   }
 }
 
-// ✅ Get projects by manager
-export async function getprojectbymanager(request, response) {
+// ✅ Get Projects by Manager
+export async function getprojectbymanager(req, res) {
   try {
     const conn = await getConnectionObject();
-    const { manager_id } = request.params;
-    const qry = `SELECT * FROM projects WHERE manager_id = ${manager_id}`;
-    const [resultSet] = await conn.query(qry);
-    response.status(200).send(resultSet);
-  } catch (error) {
-    console.error("Error fetching projects by manager:", error);
-    response.status(500).send("Something went wrong");
+    const { manager_id } = req.params;
+    const [rows] = await conn.query("SELECT * FROM projects WHERE manager_id=?", [manager_id]);
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching projects by manager:", err);
+    res.status(500).json({ error: "Something went wrong", details: err.message });
   }
 }

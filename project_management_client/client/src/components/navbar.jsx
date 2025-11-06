@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 
 function Navbar() {
   return (
-  
-    
-    <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+
+
+    <nav className="navbar navbar-expand-lg navbar-dark  shadow-sm" style={{ backgroundColor: "rgb(11,23,81)" }}>
       <div className="container">
-        <Link className="navbar-brand fw-bold text-primary" to="/">ProjectTool</Link>
+        <Link className="navbar-brand fw-bold text-primary " to="/">ProjectTool</Link>
         <button
           className="navbar-toggler"
           type="button"

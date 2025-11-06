@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import API_URL from "../api";
 import { Table, Button, Form, Container, Row, Col, Modal } from "react-bootstrap";
@@ -6,6 +7,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function Tasks({ projectId = null }) { // default null => fetch all tasks
+  const location = useLocation();
+  const queryProjectId = new URLSearchParams(location.search).get('project');
+  const effectiveProjectId = projectId || queryProjectId;
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -34,7 +38,7 @@ function Tasks({ projectId = null }) { // default null => fetch all tasks
     setLoading(true);
     try {
       console.log("Using API_URL:", API_URL);
-      const url = projectId ? `${API_URL}/tasks/project/${projectId}` : `${API_URL}/tasks`;
+      const url = effectiveProjectId ? `${API_URL}/tasks/project/${effectiveProjectId}` : `${API_URL}/tasks`;
       console.log("Fetching tasks from:", url);
       const res = await axios.get(url);
       console.log('Tasks fetched from API:', res.status, Array.isArray(res.data) ? res.data.length : typeof res.data);
@@ -51,10 +55,10 @@ function Tasks({ projectId = null }) { // default null => fetch all tasks
   };
 
   useEffect(() => {
-    console.log('Tasks component mounting, projectId=', projectId);
+    console.log('Tasks component mounting, projectId=', effectiveProjectId);
     fetchTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId]);
+  }, [effectiveProjectId, location.search]);
 
   // ✅ Handle input change
   const handleChange = (e) => {
@@ -127,7 +131,7 @@ function Tasks({ projectId = null }) { // default null => fetch all tasks
       // Only include project_id if it's provided
       const taskData = {
         ...newTask,
-        ...(projectId && { project_id: projectId }),
+        ...(effectiveProjectId && { project_id: Number(effectiveProjectId) }),
       };
       
       await axios.post(`${API_URL}/tasks`, taskData);

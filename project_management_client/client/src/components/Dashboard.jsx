@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Card, Button, Spinner, Row, Col, Table } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import API_URL from "../api";
+import { Card, Button, Spinner, Row, Col, Table, Container } from "react-bootstrap";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState({ projects: 0, users: 0, tasks: 0 });
   const [recentProjects, setRecentProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,11 +15,12 @@ export default function Dashboard() {
   // ✅ Fetch dashboard data
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       try {
         const [projRes, userRes, taskRes] = await Promise.all([
-          axios.get(`http://localhost:4400/projects`),
-          axios.get(`http://localhost:4400/users`),
-          axios.get(`http://localhost:4400/tasks`),
+          axios.get(`${API_URL}/projects`),
+          axios.get(`${API_URL}/users`),
+          axios.get(`${API_URL}/tasks`),
         ]);
 
         setSummary({
@@ -23,10 +29,13 @@ export default function Dashboard() {
           tasks: taskRes.data?.length || 0,
         });
 
-        // Show 5 most recent projects
-        setRecentProjects((projRes.data || []).slice(-5).reverse());
+        // Show 5 most recent projects (API returns DESC order, so first 5 are newest)
+        const allProjects = projRes.data || [];
+        setRecentProjects(allProjects.slice(0, 5));
       } catch (error) {
         console.error("Error loading dashboard:", error);
+        const errorMsg = error?.response?.data?.error || error?.message || "Failed to load dashboard data";
+        toast.error(errorMsg);
         // Set defaults on error
         setSummary({ projects: 0, users: 0, tasks: 0 });
         setRecentProjects([]);
@@ -40,14 +49,17 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
-        <Spinner animation="border" variant="primary" />
-      </div>
+      <Container className="mt-5">
+        <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
+          <Spinner animation="border" variant="primary" />
+        </div>
+      </Container>
     );
   }
 
   return (
-    <div className="container mt-5 mb-5" style={{ minHeight: "80vh" }}>
+    <Container className="mt-5 mb-5" style={{ minHeight: "80vh" }}>
+      <ToastContainer position="top-center" />
       <h2 className="text-center mb-4">📊 Dashboard</h2>
 
       <Row className="mb-4">
@@ -83,7 +95,11 @@ export default function Dashboard() {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">🧩 Recent Projects</h5>
-                <Button variant="outline-primary" size="sm" href="/create-project">
+                <Button 
+                  variant="outline-primary" 
+                  size="sm" 
+                  onClick={() => navigate("/create-project")}
+                >
                   ➕ New Project
                 </Button>
               </div>
@@ -104,13 +120,13 @@ export default function Dashboard() {
                     <td>
                       <Button 
                         variant="link" 
-                        href={`/tasks?project=${p.project_id}`}
-                        className="text-decoration-none"
+                        onClick={() => navigate(`/tasks?project=${p.project_id}`)}
+                        className="text-decoration-none p-0"
                       >
-                        {p.project_name}
+                        {p.project_name || "Unnamed Project"}
                       </Button>
                     </td>
-                    <td>{p.description}</td>
+                    <td>{p.description || "—"}</td>
                     <td>
                       <span className={`badge ${
                         p.status === 'Completed' ? 'bg-success' :
@@ -133,11 +149,13 @@ export default function Dashboard() {
       </Col>
       </Row>
 
-      <div className="text-center mt-4">
-        <Button variant="primary" href="/create-project">
-          ➕ Create New Project
-        </Button>
-      </div>
-    </div>
+      <Row>
+        <Col className="text-center mt-4">
+          <Button variant="primary" onClick={() => navigate("/create-project")}>
+            ➕ Create New Project
+          </Button>
+        </Col>
+      </Row>
+    </Container>
   );
 }

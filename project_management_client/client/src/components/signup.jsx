@@ -1,15 +1,16 @@
 import React from "react";
+import axios from "axios";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import API_URL from "../api.js"; // ✅ Correct import
 
-// ✅ Validation logic
 const validate = (values) => {
   const errors = {};
 
-  if (!values.full_name.trim()) {
-    errors.full_name = "Full name is required";
+  if (!values.name.trim()) {
+    errors.name = "Full name is required";
   }
 
   if (!values.email.trim()) {
@@ -21,12 +22,10 @@ const validate = (values) => {
   if (!values.password.trim()) {
     errors.password = "Password is required";
   } else if (
-    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
-      values.password
-    )
+    !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(values.password)
   ) {
     errors.password =
-      "Password must be at least 8 characters and include uppercase, lowercase, number, and special character";
+      "Password must include uppercase, lowercase, number, and special character";
   }
 
   if (!values.confirmPassword.trim()) {
@@ -41,35 +40,36 @@ const validate = (values) => {
 
   return errors;
 };
-const Signup = () => { 
 
+const Signup = () => {
   return (
     <div className="container mt-5" style={{ maxWidth: "450px" }}>
       <h3 className="text-center mb-4">Sign Up</h3>
 
-      {/* Toast container must be rendered once */}
       <ToastContainer position="top-center" autoClose={2500} />
 
       <Formik
         initialValues={{
-          full_name: "",
+          name: "",
           email: "",
           password: "",
           confirmPassword: "",
           role: "",
         }}
         validate={validate}
-        onSubmit={(values, { resetForm, setSubmitting }) => {
+        onSubmit={async (values, { resetForm, setSubmitting }) => {
           try {
-            // Simulating API success
-            console.log("Form submitted:", values);
-            toast.success("Signup Successful!", {
+            const res = await axios.post(`${API_URL}/auth/signup`, values);
+
+            toast.success(res.data.message || "Signup Successful!", {
               position: "top-center",
             });
+
             resetForm();
-          } catch(error) {
-            // If something fails
-            toast.error("Signup Failed! Please try again.");
+            setTimeout(() => (window.location.href = "/login"), 2000);
+          } catch (error) {
+            console.error("Signup Error:", error);
+            toast.error(error.response?.data?.error || "Signup Failed!");
           } finally {
             setSubmitting(false);
           }
@@ -77,20 +77,16 @@ const Signup = () => {
       >
         {({ isSubmitting }) => (
           <Form>
-            {/* Full Name */}
+            {/* Name */}
             <div className="mb-3">
               <label className="form-label">Full Name</label>
               <Field
-                name="full_name"
+                name="name"
                 type="text"
                 className="form-control"
                 placeholder="Enter your full name"
               />
-              <ErrorMessage
-                name="full_name"
-                component="div"
-                className="text-danger small"
-              />
+              <ErrorMessage name="name" component="div" className="text-danger small" />
             </div>
 
             {/* Email */}
@@ -102,11 +98,7 @@ const Signup = () => {
                 className="form-control"
                 placeholder="Enter your email"
               />
-              <ErrorMessage
-                name="email"
-                component="div"
-                className="text-danger small"
-              />
+              <ErrorMessage name="email" component="div" className="text-danger small" />
             </div>
 
             {/* Password */}
@@ -118,11 +110,7 @@ const Signup = () => {
                 className="form-control"
                 placeholder="Enter password"
               />
-              <ErrorMessage
-                name="password"
-                component="div"
-                className="text-danger small"
-              />
+              <ErrorMessage name="password" component="div" className="text-danger small" />
             </div>
 
             {/* Confirm Password */}
@@ -148,13 +136,10 @@ const Signup = () => {
                 <option value="">Select Role</option>
                 <option value="Admin">Admin</option>
                 <option value="Manager">Manager</option>
-                <option value="Team Member">Team Member</option>
+                <option value="Developer">Developer</option>
+                <option value="Tester">Tester</option>
               </Field>
-              <ErrorMessage
-                name="role"
-                component="div"
-                className="text-danger small"
-              />
+              <ErrorMessage name="role" component="div" className="text-danger small" />
             </div>
 
             {/* Submit */}
@@ -171,4 +156,5 @@ const Signup = () => {
     </div>
   );
 };
+
 export default Signup;

@@ -9,6 +9,7 @@ import Footer from "./components/footer";
 import CreateProject from "./components/createproject";
 import Tasks from "./components/task";
 import Dashboard from "./components/Dashboard";
+import Login from "./components/login";
 
 function App() {
   return (
@@ -18,10 +19,12 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/create-project" element={<CreateProject />} />
           <Route path="/about" element={<About />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin" element={<Dashboard />} />
         </Routes>
       </div>
       <Footer />

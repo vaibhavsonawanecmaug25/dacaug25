@@ -1,57 +1,35 @@
-// src/config.js
-import { createConnection } from "mysql2/promise";
+import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+dotenv.config();
 
-let conn = null;
+let connection;
 
 export async function connectDB() {
   try {
-    if (!conn) {
-      conn = await createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: 'cdac1234',
-        database: 'project_management',
-        port: 3306,
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0,
-        multipleStatements: true
-      });
-
-      // Test the connection
-      const [rows] = await conn.query('SELECT 1');
-      if (rows[0]['1'] === 1) {
-        console.log("✅ Database connected successfully!");
-        return conn;
-      }
+    if (connection && connection.connection && connection.connection.state !== "disconnected") {
+      console.log("Database already connected");
+      return connection;
     }
-    return conn;
-  } catch (error) {
-    console.error("❌ Database connection failed:", error.message);
-    conn = null;
-    throw error;
+
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST || "localhost",
+      user: process.env.DB_USER || "root",
+      password: process.env.DB_PASSWORD || "cdac1234",
+      database: process.env.DB_NAME || "project_management",
+      port: Number(process.env.DB_PORT) || 3306
+    });
+
+    console.log("Database connected successfully!");
+    return connection;
+  } catch (err) {
+    console.error("Database connection failed:", err.message);
+    return null;
   }
 }
 
 export async function getConnectionObject() {
-  try {
-    if (!conn) {
-      conn = await connectDB();
-    } else {
-      // Verify connection is still alive
-      try {
-        await conn.query('SELECT 1');
-      } catch (error) {
-        console.log("Reconnecting to database...");
-        conn = await connectDB();
-      }
-    }
-    return conn;
-  } catch (error) {
-    console.error("Failed to get database connection:", error.message);
-    throw error;
+  if (!connection) {
+    connection = await connectDB();
   }
+  return connection;
 }
-
-// Do not initialize connection here, let the server do it
-

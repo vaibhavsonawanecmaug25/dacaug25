@@ -3,7 +3,7 @@ import { Container, Row, Col } from "react-bootstrap";
 
 export default function Footer() {
   return (
-    <footer className="bg-dark text-light py-4 mt-5">
+    <footer className="bg-light text-dark py-4 mt-5" style={{backgroundColor:"rgba(199, 193, 193, 1)"}}>
       <Container>
         <Row className="text-center text-md-start">
           <Col md={4} className="mb-3">
@@ -16,10 +16,10 @@ export default function Footer() {
           <Col md={4} className="mb-3">
             <h5>Quick Links</h5>
             <ul className="list-unstyled">
-              <li><a href="/" className="text-light text-decoration-none">Home</a></li>
-              <li><a href="/about" className="text-light text-decoration-none">About</a></li>
-              <li><a href="/contact" className="text-light text-decoration-none">Contact</a></li>
-              <li><a href="/signup" className="text-light text-decoration-none">Signup</a></li>
+              <li><a href="/" className="text-dark text-decoration-none">Home</a></li>
+              <li><a href="/about" className="text-dark text-decoration-none">About</a></li>
+              <li><a href="/contact" className="text-dark text-decoration-none">Contact</a></li>
+              <li><a href="/signup" className="text-dark text-decoration-none">Signup</a></li>
             </ul>
           </Col>
 
