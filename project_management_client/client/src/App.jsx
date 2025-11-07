@@ -13,6 +13,7 @@ import DashboardUser from "./components/dashboarduser.jsx";
 import Login from "./components/login.jsx";
 import ProtectedRoute from "./components/protectedroutes.jsx"; 
 import Contact from "./components/contact.jsx";
+import Assign from "./components/assign.jsx";
 
 function App() {
   return (
@@ -57,6 +58,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardAdmin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/assign"
+            element={
+              <ProtectedRoute>
+                <Assign />
               </ProtectedRoute>
             }
           />

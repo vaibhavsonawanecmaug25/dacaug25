@@ -28,7 +28,7 @@ export async function connectDB() {
 }
 
 export async function getConnectionObject() {
-  if (!connection) {
+  if (!connection || (connection.connection && connection.connection.state === "disconnected")) {
     connection = await connectDB();
   }
   return connection;

@@ -2,6 +2,7 @@ import React from "react";
 import { useAuth } from "./authcontext.jsx";
 import DashboardAdmin from "./dashboardadmin.jsx";
 import DashboardUser from "./dashboarduser.jsx";
+import DashboardManager from "./dashboardmanager.jsx";
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -19,12 +20,16 @@ export default function Dashboard() {
     );
   }
 
-  // Check if user is admin (case-insensitive)
-  const isAdmin = user?.role?.toLowerCase() === "admin";
+  // Check user role (case-insensitive)
+  const userRole = user?.role?.toLowerCase();
+  const isAdmin = userRole === "admin";
+  const isManager = userRole === "manager";
 
-  // Show admin dashboard for admin users, user dashboard for others
+  // Show appropriate dashboard based on role
   if (isAdmin) {
     return <DashboardAdmin />;
+  } else if (isManager) {
+    return <DashboardManager />;
   }
 
   return <DashboardUser />;
