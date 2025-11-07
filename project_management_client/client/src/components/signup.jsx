@@ -59,7 +59,12 @@ const Signup = () => {
         validate={validate}
         onSubmit={async (values, { resetForm, setSubmitting }) => {
           try {
+            console.log("Submitting signup:", values);
+            console.log("API URL:", `${API_URL}/auth/signup`);
+            
             const res = await axios.post(`${API_URL}/auth/signup`, values);
+
+            console.log("Signup response:", res.data);
 
             toast.success(res.data.message || "Signup Successful!", {
               position: "top-center",
@@ -69,7 +74,32 @@ const Signup = () => {
             setTimeout(() => (window.location.href = "/login"), 2000);
           } catch (error) {
             console.error("Signup Error:", error);
-            toast.error(error.response?.data?.error || "Signup Failed!");
+            console.error("Error details:", {
+              message: error.message,
+              response: error.response?.data,
+              status: error.response?.status,
+              url: error.config?.url
+            });
+            
+            let errorMessage = "Signup Failed!";
+            
+            if (error.response) {
+              // Server responded with error
+              errorMessage = error.response.data?.error || 
+                           error.response.data?.message || 
+                           `Server error: ${error.response.status}`;
+            } else if (error.request) {
+              // Request was made but no response received
+              errorMessage = "Cannot connect to server. Please check if the server is running.";
+            } else {
+              // Something else happened
+              errorMessage = error.message || "An unexpected error occurred";
+            }
+            
+            toast.error(errorMessage, {
+              position: "top-center",
+              autoClose: 5000
+            });
           } finally {
             setSubmitting(false);
           }

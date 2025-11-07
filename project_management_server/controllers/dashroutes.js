@@ -64,19 +64,31 @@ router.get("/tasks/user/:id", authMiddleware, async (req, res) => {
 router.get("/projects/user/:id", authMiddleware, async (req, res) => {
   try {
     const conn = await getConnectionObject();
-    const userId = req.params.id;
+    const userId = parseInt(req.params.id);
+    
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: "Invalid user ID", error: "User ID must be a number" });
+    }
+
+    // Get projects where user is manager OR has tasks assigned
+    // Using subquery approach to handle both cases properly
     const [rows] = await conn.query(
       `SELECT DISTINCT p.project_id as id, p.project_name as title, p.description, 
-              p.start_date, p.end_date, p.status, p.manager_id
+              p.start_date, p.end_date, p.status, p.manager_id, p.created_at
        FROM projects p
-       LEFT JOIN tasks t ON p.project_id = t.project_id
-       WHERE t.assigned_to = ? OR p.manager_id = ?
+       WHERE p.manager_id = ? 
+          OR p.project_id IN (
+              SELECT DISTINCT project_id 
+              FROM tasks 
+              WHERE assigned_to = ? AND project_id IS NOT NULL
+          )
        ORDER BY p.created_at DESC`,
       [userId, userId]
     );
     res.json(rows);
   } catch (err) {
     console.error("Error fetching user projects:", err);
+    console.error("Error stack:", err.stack);
     res.status(500).json({ message: "Error fetching user projects", error: err.message });
   }
 });
