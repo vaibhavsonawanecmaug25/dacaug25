@@ -8,6 +8,8 @@ import Footer from "./components/footer.jsx";
 import CreateProject from "./components/createproject.jsx";
 import Tasks from "./components/task.jsx";
 import Dashboard from "./components/Dashboard.jsx";
+import DashboardAdmin from "./components/dashboardadmin.jsx";
+import DashboardUser from "./components/dashboarduser.jsx";
 import Login from "./components/login.jsx";
 import ProtectedRoute from "./components/protectedroutes.jsx"; 
 import Contact from "./components/contact.jsx";
@@ -54,7 +56,7 @@ function App() {
             path="/admin"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <DashboardAdmin />
               </ProtectedRoute>
             }
           />

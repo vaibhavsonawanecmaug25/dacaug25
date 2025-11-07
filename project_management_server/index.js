@@ -43,6 +43,7 @@ import {
 } from "./controllers/commentcontroller.js";
 
 import authRoutes from "./controllers/authroutes.js"; // ✅ Auth router import
+import dashRoutes from "./controllers/dashroutes.js"; // ✅ Dashboard router import
 
 // ============================
 // ✅ App Initialization
@@ -69,6 +70,12 @@ app.get("/", (req, res) => {
 // ============================
 app.use("/auth", authRoutes);
 console.log("✅ /auth routes mounted");
+
+// ============================
+// ✅ DASHBOARD ROUTES
+// ============================
+app.use("/api/dashboard", dashRoutes);
+console.log("✅ /api/dashboard routes mounted");
 
 
 
